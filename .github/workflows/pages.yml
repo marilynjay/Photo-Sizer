@@ -1,0 +1,40 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [claude/comic-image-padding-app-jqcmi9, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it half-published.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # enablement creates the Pages site and sets its build type to
+      # "GitHub Actions", so the deploy no longer depends on the branch
+      # dropdown in repository settings having been saved.
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      # The app is a single static file, so the repo root is the site root.
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
