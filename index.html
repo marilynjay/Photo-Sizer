@@ -3,6 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- Home-screen install: these live outside the ARTIFACT region because they
+     only apply to the page as hosted, not to the embedded copy. -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<!-- Launch without Safari chrome once added to the home screen. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Panel Gutter">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+<!-- Tint the status bar to the page ground so it reads as one surface in both themes. -->
+<meta name="theme-color" content="#E9EAEF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111218" media="(prefers-color-scheme: dark)">
 <!--ARTIFACT-->
 <title>Panel Gutter</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bungee&display=swap">
@@ -65,7 +82,7 @@
     max-width: 460px;
     margin: 0 auto;
     padding-inline: 18px;
-    padding-block: 22px 40px;
+    padding-block: 22px calc(40px + env(safe-area-inset-bottom, 0px));
     display: flex;
     flex-direction: column;
     gap: 20px;

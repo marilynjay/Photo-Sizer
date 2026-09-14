@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Panel Gutter">
+  <title>Panel Gutter</title>
+  <defs>
+    <clipPath id="p1"><rect x="154" y="87"  width="204" height="106" rx="5"/></clipPath>
+    <clipPath id="p2"><rect x="154" y="203" width="204" height="106"/></clipPath>
+    <clipPath id="p3"><rect x="154" y="319" width="204" height="106" rx="5"/></clipPath>
+  </defs>
+
+  <!-- The ground is the gutter: process magenta, the colour the app is built around. -->
+  <rect width="512" height="512" fill="#D6006E"/>
+
+  <!-- The artwork: a three-panel strip held clear of the edges by the gutters.
+       Kept inside the central safe zone so a circular maskable crop cannot clip it. -->
+  <rect x="154" y="87" width="204" height="338" rx="5" fill="#FBFBF7"/>
+
+  <!-- panel 1: horizon, peak, sun -->
+  <g clip-path="url(#p1)">
+    <rect x="154" y="160" width="204" height="33" fill="#14151B"/>
+    <path d="M214 160 L246 112 L278 160 Z" fill="#14151B"/>
+    <circle cx="322" cy="120" r="21" fill="#D6006E"/>
+  </g>
+
+  <!-- panel 2: a speech balloon, the most comic-legible glyph at small sizes -->
+  <g clip-path="url(#p2)" fill="#14151B">
+    <rect x="176" y="225" width="128" height="56" rx="28"/>
+    <path d="M204 273 L198 305 L232 277 Z"/>
+  </g>
+
+  <!-- panel 3: speed lines -->
+  <g clip-path="url(#p3)" fill="#14151B">
+    <path d="M186 425 L232 319 L262 319 L216 425 Z"/>
+    <path d="M246 425 L292 319 L322 319 L276 425 Z"/>
+    <path d="M306 425 L352 319 L382 319 L336 425 Z"/>
+  </g>
+
+  <!-- the gutters between panels, in the same magenta as the outer ones -->
+  <rect x="154" y="193" width="204" height="10" fill="#D6006E"/>
+  <rect x="154" y="309" width="204" height="10" fill="#D6006E"/>
+</svg>
