@@ -1,8 +1,10 @@
 name: Deploy to GitHub Pages
 
+# Only main deploys: the github-pages environment refuses other branches,
+# so triggering elsewhere just leaves a failed run behind.
 on:
   push:
-    branches: [claude/comic-image-padding-app-jqcmi9, main]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
