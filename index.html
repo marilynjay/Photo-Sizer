@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--ARTIFACT-->
+<title>Panel Gutter</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bungee&display=swap">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --paper:  #E9EAEF;
+    --card:   #FFFFFF;
+    --stage:  #DCDDE4;
+    --ink:    #14151B;
+    --muted:  #6E6F7D;
+    --line:   #D2D3DC;
+    --accent: #D6006E;
+    --accent-ink: #FFFFFF;
+    --shadow: 0 1px 2px rgba(20,21,27,.08), 0 8px 24px rgba(20,21,27,.07);
+
+    --sans: "Archivo", ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
+    --display: "Bungee", "Archivo", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:  #111218;
+      --card:   #1A1B23;
+      --stage:  #0A0B0F;
+      --ink:    #ECECF2;
+      --muted:  #9193A3;
+      --line:   #2C2E39;
+      --accent: #FF3D9A;
+      --accent-ink: #14151B;
+      --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:  #111218;
+    --card:   #1A1B23;
+    --stage:  #0A0B0F;
+    --ink:    #ECECF2;
+    --muted:  #9193A3;
+    --line:   #2C2E39;
+    --accent: #FF3D9A;
+    --accent-ink: #14151B;
+    --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px rgba(0,0,0,.4);
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  img { max-width: 100%; }
+
+  .page {
+    max-width: 460px;
+    margin: 0 auto;
+    padding-inline: 18px;
+    padding-block: 22px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ---- masthead ---- */
+  .masthead { display: flex; flex-direction: column; gap: 3px; }
+  .mark {
+    font-family: var(--display);
+    font-size: 19px;
+    letter-spacing: .01em;
+    line-height: 1.1;
+  }
+  .mark .gut { color: var(--accent); }
+  .tag { margin: 0; color: var(--muted); font-size: 13.5px; }
+
+  /* ---- stage ---- */
+  .stage {
+    position: relative;
+    background: var(--stage);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 22px;
+    min-height: 210px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .stage.drag { border-color: var(--accent); }
+
+  /* crop marks — what a printer puts at the trim edge */
+  .crop { position: absolute; width: 13px; height: 13px; border: 0 solid var(--muted); opacity: .55; pointer-events: none; }
+  .crop.tl { top: 7px;  left: 7px;  border-top-width: 1px; border-left-width: 1px; }
+  .crop.tr { top: 7px;  right: 7px; border-top-width: 1px; border-right-width: 1px; }
+  .crop.bl { bottom: 7px; left: 7px;  border-bottom-width: 1px; border-left-width: 1px; }
+  .crop.br { bottom: 7px; right: 7px; border-bottom-width: 1px; border-right-width: 1px; }
+
+  #out {
+    display: block;
+    max-height: 46vh;
+    max-width: 100%;
+    width: auto;
+    box-shadow: 0 2px 14px rgba(0,0,0,.22);
+  }
+  #out[hidden] { display: none; }
+
+  .drop {
+    appearance: none;
+    background: none;
+    border: 1px dashed var(--line);
+    border-radius: 2px;
+    color: var(--muted);
+    font: inherit;
+    padding: 30px 22px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 1.45;
+  }
+  .drop b { display: block; color: var(--ink); font-weight: 600; }
+  .drop:hover { border-color: var(--accent); color: var(--ink); }
+
+  .readout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    font-size: 12.5px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .readout .sample {
+    color: var(--accent);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    font-size: 11px;
+  }
+
+  /* ---- control groups ---- */
+  .group { display: flex; flex-direction: column; gap: 9px; border: 0; margin: 0; padding: 0; }
+  .group > legend,
+  .grouphead {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    width: 100%;
+    padding: 0;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--muted);
+  }
+  .grouphead output { font-variant-numeric: tabular-nums; letter-spacing: .02em; color: var(--ink); text-transform: none; font-size: 12.5px; }
+
+  .row { display: flex; flex-wrap: wrap; gap: 7px; }
+
+  .chip {
+    appearance: none;
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 8px 11px;
+    cursor: pointer;
+    line-height: 1.15;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .chip small { color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .chip:hover { border-color: var(--muted); }
+  .chip[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  .chip[aria-pressed="true"] small { color: var(--accent-ink); opacity: .8; }
+
+  .dot {
+    width: 15px; height: 15px; border-radius: 50%;
+    border: 1px solid rgba(128,128,128,.65);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.14);
+    flex: none;
+  }
+
+  .picker { position: relative; overflow: hidden; }
+  .picker input[type="color"] {
+    position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%;
+    cursor: pointer; border: 0; padding: 0;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    margin: 0;
+  }
+
+  /* ---- actions ---- */
+  .actions { display: flex; flex-direction: column; gap: 9px; }
+  .btn {
+    appearance: none;
+    font: inherit;
+    font-weight: 600;
+    border-radius: 2px;
+    padding: 13px 16px;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+  }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    font-size: 16px;
+  }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn.primary:not(:disabled):hover { filter: brightness(1.08); }
+
+  .hint { margin: 0; font-size: 12.5px; color: var(--muted); text-align: center; }
+
+  :where(button, input, a):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 13.5px;
+    font-weight: 500;
+    padding: 9px 16px;
+    border-radius: 2px;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transition: opacity .18s ease;
+    pointer-events: none;
+    z-index: 10;
+    max-width: calc(100vw - 36px);
+  }
+  .toast.show { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<!--BODY-->
+<div class="page">
+
+  <header class="masthead">
+    <h1 class="mark">Panel <span class="gut">Gutter</span></h1>
+    <p class="tag">Pad a too-tall comic until it fits the frame, instead of letting the crop eat your top and bottom panels.</p>
+  </header>
+
+  <section class="stage" id="stage" aria-label="Preview">
+    <span class="crop tl"></span><span class="crop tr"></span>
+    <span class="crop bl"></span><span class="crop br"></span>
+    <img id="out" alt="Your comic with gutters added" hidden>
+    <button class="drop" id="drop" type="button" hidden>
+      <b>Choose a photo</b>
+      or drop one here
+    </button>
+  </section>
+
+  <p class="readout" id="readout"><span class="sample">Sample strip</span><span id="dims">—</span></p>
+
+  <fieldset class="group">
+    <legend>Frame</legend>
+    <div class="row" id="ratios"></div>
+  </fieldset>
+
+  <fieldset class="group">
+    <legend>Gutter color</legend>
+    <div class="row" id="colors">
+      <button class="chip" type="button" data-color="#000000"><span class="dot" style="background:#000"></span>Black</button>
+      <button class="chip" type="button" data-color="#FFFFFF"><span class="dot" style="background:#fff"></span>White</button>
+      <button class="chip" type="button" id="matchBtn"><span class="dot" id="matchDot"></span>Match edges</button>
+      <span class="chip picker" id="pickerChip">
+        <span class="dot" id="customDot"></span>Custom
+        <input type="color" id="custom" value="#D6006E" aria-label="Custom gutter color">
+      </span>
+    </div>
+  </fieldset>
+
+  <div class="group">
+    <div class="grouphead"><label for="pad">Extra gutter</label><output id="padOut" for="pad">None</output></div>
+    <input type="range" id="pad" min="0" max="20" step="1" value="0">
+  </div>
+
+  <fieldset class="group">
+    <legend>File</legend>
+    <div class="row" id="formats">
+      <button class="chip" type="button" data-fmt="png">PNG <small>crisp line art</small></button>
+      <button class="chip" type="button" data-fmt="jpeg">JPG <small>smaller</small></button>
+    </div>
+  </fieldset>
+
+  <div class="actions">
+    <button class="btn primary" id="save" type="button">Save image</button>
+    <button class="btn" id="choose" type="button">Choose a different photo</button>
+  </div>
+
+  <p class="hint" id="hint">On a phone you can also press and hold the preview to save it straight to your camera roll.</p>
+</div>
+
+<input type="file" id="file" accept="image/*" hidden>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var MAX_EXPORT = 3000;   // cap the long edge so phones can encode it
+  var MAX_PREVIEW = 1400;
+
+  var FRAMES = [
+    { id: "45",   label: "4:5",    note: "feed",   r: 4 / 5 },
+    { id: "11",   label: "1:1",    note: "square", r: 1 },
+    { id: "916",  label: "9:16",   note: "story",  r: 9 / 16 },
+    { id: "1911", label: "1.91:1", note: "wide",   r: 1.91 },
+    { id: "orig", label: "Original", note: "border only", r: null }
+  ];
+
+  var el = function (id) { return document.getElementById(id); };
+  var stage = el("stage"), out = el("out"), drop = el("drop"), fileInput = el("file");
+  var dims = el("dims"), readout = el("readout"), toastEl = el("toast");
+  var padEl = el("pad"), padOut = el("padOut"), saveBtn = el("save");
+  var customInput = el("custom"), customDot = el("customDot"), matchDot = el("matchDot");
+
+  var state = {
+    img: null,
+    isSample: true,
+    frame: "45",
+    color: "#FFFFFF",
+    edgeColor: "#FFFFFF",
+    pad: 0,
+    fmt: "png"
+  };
+
+  var previewURL = null;
+  var downloads = null;
+
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("downloads").then(function (d) { downloads = d; }, function () {});
+  }
+
+  /* ---------- chips ---------- */
+
+  FRAMES.forEach(function (f) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.dataset.frame = f.id;
+    b.innerHTML = "";
+    b.appendChild(document.createTextNode(f.label));
+    var s = document.createElement("small");
+    s.textContent = f.note;
+    b.appendChild(s);
+    b.addEventListener("click", function () { state.frame = f.id; syncChips(); render(); });
+    el("ratios").appendChild(b);
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll("#colors [data-color]"), function (b) {
+    b.addEventListener("click", function () { state.color = b.dataset.color; syncChips(); render(); });
+  });
+
+  el("matchBtn").addEventListener("click", function () { state.color = state.edgeColor; syncChips(); render(); });
+
+  customInput.addEventListener("input", function () {
+    state.color = customInput.value.toUpperCase();
+    syncChips();
+    render();
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll("#formats [data-fmt]"), function (b) {
+    b.addEventListener("click", function () { state.fmt = b.dataset.fmt; syncChips(); });
+  });
+
+  padEl.addEventListener("input", function () {
+    state.pad = +padEl.value;
+    padOut.textContent = state.pad ? "Artwork " + state.pad + "% smaller" : "None";
+    render();
+  });
+
+  function syncChips() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-frame]"), function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.frame === state.frame));
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-fmt]"), function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.fmt === state.fmt));
+    });
+    var hit = false;
+    Array.prototype.forEach.call(document.querySelectorAll("#colors [data-color]"), function (b) {
+      var on = same(b.dataset.color, state.color);
+      if (on) hit = true;
+      b.setAttribute("aria-pressed", String(on));
+    });
+    var matchOn = !hit && same(state.edgeColor, state.color);
+    el("matchBtn").setAttribute("aria-pressed", String(matchOn));
+    el("pickerChip").setAttribute("aria-pressed", String(!hit && !matchOn));
+    matchDot.style.background = state.edgeColor;
+    customDot.style.background = customInput.value;
+  }
+
+  function same(a, b) { return String(a).toUpperCase() === String(b).toUpperCase(); }
+
+  /* ---------- geometry ---------- */
+
+  function frameFor(iw, ih) {
+    var f = FRAMES.filter(function (x) { return x.id === state.frame; })[0];
+    var r = f.r === null ? iw / ih : f.r;
+    var W = iw, H = ih;
+    if (iw / ih < r) W = Math.round(ih * r); else H = Math.round(iw / r);
+    return { W: W, H: H };
+  }
+
+  function layout(maxLong) {
+    var img = state.img;
+    var fr = frameFor(img.width, img.height);
+    var k = Math.min(1, maxLong / Math.max(fr.W, fr.H));
+    var W = Math.max(1, Math.round(fr.W * k));
+    var H = Math.max(1, Math.round(fr.H * k));
+    // Extra gutter shrinks the artwork inside the frame, so the ratio stays exact.
+    var fit = Math.min(W / img.width, H / img.height) * (1 - state.pad / 100);
+    var dw = Math.round(img.width * fit);
+    var dh = Math.round(img.height * fit);
+    return { W: W, H: H, dw: dw, dh: dh, x: Math.round((W - dw) / 2), y: Math.round((H - dh) / 2) };
+  }
+
+  function draw(maxLong) {
+    var L = layout(maxLong);
+    var c = document.createElement("canvas");
+    c.width = L.W;
+    c.height = L.H;
+    var ctx = c.getContext("2d");
+    ctx.fillStyle = state.color;
+    ctx.fillRect(0, 0, L.W, L.H);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(state.img, L.x, L.y, L.dw, L.dh);
+    return { canvas: c, layout: L };
+  }
+
+  /* ---------- render ---------- */
+
+  var pending = null;
+  function render() {
+    if (!state.img) return;
+    clearTimeout(pending);
+    pending = setTimeout(paint, 90);
+  }
+
+  function paint() {
+    var r = draw(MAX_PREVIEW);
+    var full = layout(MAX_EXPORT);
+    r.canvas.toBlob(function (blob) {
+      if (!blob) return;
+      if (previewURL) URL.revokeObjectURL(previewURL);
+      previewURL = URL.createObjectURL(blob);
+      out.src = previewURL;
+      out.hidden = false;
+      drop.hidden = true;
+      out.style.aspectRatio = full.W + " / " + full.H;
+    }, "image/png");
+
+    var side = Math.round((full.W - full.dw) / 2);
+    var top = Math.round((full.H - full.dh) / 2);
+    var bits = [full.W + " × " + full.H + " px"];
+    if (side > 0) bits.push(side + " px each side");
+    if (top > 0) bits.push(top + " px top and bottom");
+    if (side === 0 && top === 0) bits.push("no gutter needed");
+    dims.textContent = bits.join(" · ");
+  }
+
+  /* ---------- loading images ---------- */
+
+  function adopt(bitmap, isSample) {
+    state.img = bitmap;
+    state.isSample = !!isSample;
+    state.edgeColor = sampleEdges(bitmap);
+    if (isSample) state.color = "#FFFFFF";
+    readout.querySelector(".sample").hidden = !isSample;
+    saveBtn.disabled = false;
+    saveBtn.textContent = isSample ? "Save sample image" : "Save image";
+    syncChips();
+    paint();
+  }
+
+  async function loadFile(file) {
+    if (!file || !/^image\//.test(file.type)) {
+      toast("That file isn’t an image — try a JPG, PNG, or HEIC.");
+      return;
+    }
+    try {
+      var bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+      adopt(bmp, false);
+      toast("Loaded " + bmp.width + " × " + bmp.height);
+    } catch (e) {
+      toast("Couldn’t read that image. Try exporting it as a JPG first.");
+    }
+  }
+
+  // Median of the four border rows/columns — usually the comic's own paper color.
+  function sampleEdges(img) {
+    var n = 64;
+    var c = document.createElement("canvas");
+    c.width = n; c.height = n;
+    var ctx = c.getContext("2d", { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0, n, n);
+    var d;
+    try { d = ctx.getImageData(0, 0, n, n).data; } catch (e) { return "#FFFFFF"; }
+    var rs = [], gs = [], bs = [];
+    function take(x, y) {
+      var i = (y * n + x) * 4;
+      rs.push(d[i]); gs.push(d[i + 1]); bs.push(d[i + 2]);
+    }
+    for (var i = 0; i < n; i++) { take(0, i); take(n - 1, i); take(i, 0); take(i, n - 1); }
+    var mid = function (a) { a.sort(function (p, q) { return p - q; }); return a[a.length >> 1]; };
+    var hex = function (v) { return ("0" + v.toString(16)).slice(-2).toUpperCase(); };
+    return "#" + hex(mid(rs)) + hex(mid(gs)) + hex(mid(bs));
+  }
+
+  /* ---------- input wiring ---------- */
+
+  el("choose").addEventListener("click", function () { fileInput.click(); });
+  drop.addEventListener("click", function () { fileInput.click(); });
+  fileInput.addEventListener("change", function () {
+    if (fileInput.files && fileInput.files[0]) loadFile(fileInput.files[0]);
+    fileInput.value = "";
+  });
+
+  ["dragenter", "dragover"].forEach(function (t) {
+    stage.addEventListener(t, function (e) { e.preventDefault(); stage.classList.add("drag"); });
+  });
+  ["dragleave", "drop"].forEach(function (t) {
+    stage.addEventListener(t, function (e) { e.preventDefault(); stage.classList.remove("drag"); });
+  });
+  stage.addEventListener("drop", function (e) {
+    if (e.dataTransfer && e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+  });
+  window.addEventListener("paste", function (e) {
+    var items = (e.clipboardData && e.clipboardData.files) || [];
+    if (items[0]) loadFile(items[0]);
+  });
+
+  /* ---------- saving ---------- */
+
+  saveBtn.addEventListener("click", async function () {
+    if (!state.img) return;
+    saveBtn.disabled = true;
+    var label = saveBtn.textContent;
+    saveBtn.textContent = "Preparing…";
+    try {
+      var type = state.fmt === "jpeg" ? "image/jpeg" : "image/png";
+      var ext = state.fmt === "jpeg" ? "jpg" : "png";
+      var r = draw(MAX_EXPORT);
+      var blob = await new Promise(function (res) {
+        r.canvas.toBlob(res, type, state.fmt === "jpeg" ? 0.94 : undefined);
+      });
+      if (!blob) throw new Error("encode");
+      var name = "comic-" + r.layout.W + "x" + r.layout.H + "." + ext;
+
+      if (downloads) {
+        try {
+          await downloads.save({ filename: name, data: blob });
+          toast("Saved " + name);
+          return;
+        } catch (err) {
+          if (err && err.code === "declined") return;
+        }
+      }
+
+      var file = new File([blob], name, { type: type });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file] });
+          return;
+        } catch (err) {
+          if (err && err.name === "AbortError") return;
+        }
+      }
+
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      toast("Saved " + name);
+    } catch (err) {
+      toast("Couldn’t build the image — try a smaller photo, or switch to JPG.");
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = label;
+    }
+  });
+
+  var toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2600);
+  }
+
+  /* ---------- sample strip: 900 × 2400, far taller than any feed frame ---------- */
+
+  function sampleStrip() {
+    var W = 900, H = 2400, M = 36, G = 26;
+    var c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    var x = c.getContext("2d");
+    var CYAN = "#00A6E0", MAG = "#E8007D", INK = "#141419";
+
+    x.fillStyle = "#FBFBF7";
+    x.fillRect(0, 0, W, H);
+
+    var ph = (H - M * 2 - G * 2) / 3;
+    for (var p = 0; p < 3; p++) {
+      var py = M + p * (ph + G), pw = W - M * 2;
+      x.save();
+      x.beginPath();
+      x.rect(M, py, pw, ph);
+      x.clip();
+
+      x.fillStyle = p === 1 ? "#FFF0F6" : "#EAF7FD";
+      x.fillRect(M, py, pw, ph);
+
+      // halftone field
+      x.fillStyle = p === 1 ? MAG : CYAN;
+      x.globalAlpha = .22;
+      for (var dy = 0; dy < ph; dy += 18) {
+        for (var dx = 0; dx < pw; dx += 18) {
+          var rr = 3.4 * (1 - dy / ph);
+          if (rr > 0.3) { x.beginPath(); x.arc(M + dx + 9, py + dy + 9, rr, 0, 6.284); x.fill(); }
+        }
+      }
+      x.globalAlpha = 1;
+
+      if (p === 0) {
+        x.fillStyle = MAG;
+        x.beginPath(); x.arc(W - M - 150, py + 150, 70, 0, 6.284); x.fill();
+        x.fillStyle = INK;
+        x.fillRect(M, py + ph - 130, pw, 130);
+        x.beginPath(); x.moveTo(M + 190, py + ph - 130);
+        x.lineTo(M + 300, py + ph - 300); x.lineTo(M + 410, py + ph - 130); x.fill();
+      } else if (p === 1) {
+        x.fillStyle = INK;
+        [[300, 210], [560, 240]].forEach(function (f) {
+          x.beginPath(); x.arc(f[0], py + ph - f[1] - 96, 52, 0, 6.284); x.fill();
+          x.beginPath();
+          x.moveTo(f[0] - 74, py + ph);
+          x.quadraticCurveTo(f[0], py + ph - f[1] - 40, f[0] + 74, py + ph);
+          x.fill();
+        });
+      } else {
+        x.strokeStyle = INK;
+        x.lineWidth = 7;
+        for (var s = -3; s < 9; s++) {
+          x.beginPath();
+          x.moveTo(M + s * 110, py + ph);
+          x.lineTo(M + s * 110 + 260, py);
+          x.stroke();
+        }
+      }
+
+      // speech balloon
+      if (p !== 0) {
+        var bx = p === 1 ? M + 60 : M + 250, by = py + 54, bw = 420, bh = 150;
+        x.fillStyle = "#FFFFFF"; x.strokeStyle = INK; x.lineWidth = 6;
+        x.beginPath();
+        if (x.roundRect) x.roundRect(bx, by, bw, bh, 66); else x.rect(bx, by, bw, bh);
+        x.fill(); x.stroke();
+        x.beginPath();
+        x.moveTo(bx + 90, by + bh - 8); x.lineTo(bx + 74, by + bh + 62); x.lineTo(bx + 160, by + bh - 8);
+        x.closePath(); x.fill();
+        x.strokeStyle = INK; x.lineWidth = 11; x.lineCap = "round";
+        [0, 1, 2].forEach(function (l) {
+          x.beginPath();
+          x.moveTo(bx + 46, by + 48 + l * 33);
+          x.lineTo(bx + bw - (l === 2 ? 150 : 46), by + 48 + l * 33);
+          x.stroke();
+        });
+      }
+
+      x.restore();
+      x.strokeStyle = INK;
+      x.lineWidth = 8;
+      x.strokeRect(M + 4, py + 4, W - M * 2 - 8, ph - 8);
+    }
+    return c;
+  }
+
+  /* ---------- boot ---------- */
+
+  padOut.textContent = "None";
+  syncChips();
+
+  createImageBitmap(sampleStrip()).then(function (b) {
+    adopt(b, true);
+  }, function () {
+    drop.hidden = false;
+    saveBtn.disabled = true;
+    readout.querySelector(".sample").hidden = true;
+    dims.textContent = "Choose a photo to begin";
+  });
+})();
+</script>
+<!--/BODY-->
+<!--/ARTIFACT-->
+</body>
+</html>
